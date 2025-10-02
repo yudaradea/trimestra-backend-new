@@ -4,9 +4,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Exercisecontroller;
 use App\Http\Controllers\FoodCategoryController;
 use App\Http\Controllers\FoodController;
+use App\Http\Controllers\FoodDiaryController;
 use App\Http\Controllers\NutritionRequirementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserFoodController;
 use App\Http\Controllers\WeightLogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +49,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // food
     Route::apiResource('food', FoodController::class);
     Route::get('/food/all/paginated', [FoodController::class, 'getAllPaginated']);
+
+    // user food
+    Route::apiResource('user-food', UserFoodController::class);
+    Route::get('/user-food/all/paginated', [UserFoodController::class, 'getAllPaginated']);
+
+    // food diary
+    Route::apiResource('food-diary', FoodDiaryController::class);
+    Route::get('/food-diary/all/paginated', [FoodDiaryController::class, 'getAllPaginated']);
 
     // exercise
     Route::apiResource('exercise', Exercisecontroller::class);

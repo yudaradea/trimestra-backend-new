@@ -26,4 +26,9 @@ class Exercise extends Model
     {
         return $query->where('name', 'like', "%{$search}%");
     }
+
+    public function userExercises()
+    {
+        return $this->hasMany(UserExercise::class);
+    }
 }

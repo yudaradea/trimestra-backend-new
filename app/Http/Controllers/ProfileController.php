@@ -24,16 +24,20 @@ class ProfileController extends Controller
 
     public function show(Request $request)
     {
-        $user = $request->user();
-        $profile = $user->profile;
-        $nutrition_target = $user->nutritionTargets;
+        try {
+            $user = $request->user();
 
+            if (!$user) {
+                return ResponseHelper::jsonResponse(false, 'Unauthenticated', null, 401);
+            }
 
-        if (!$user) {
-            return ResponseHelper::jsonResponse(false, 'User Tidak Ditemukan', null, 404);
+            $profile = $user->profile;
+            $nutrition_target = $user->nutritionTargets;
+
+            return ResponseHelper::jsonResponse(true, 'Profile Berhasil Diambil', UserResource::make($user, $profile, $nutrition_target), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
-
-        return ResponseHelper::jsonResponse('true', 'Data user berhasil diambil', UserResource::make($user, $profile, $nutrition_target), 200);
     }
 
     public function update(Request $request, UpdateProfileRequest $updateRequest)
