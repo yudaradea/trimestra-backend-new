@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, UUID, SoftDeletes;
+    use HasFactory, Notifiable, UUID, SoftDeletes, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -50,6 +51,19 @@ class User extends Authenticatable
         ];
     }
 
+    public function scopeSearch($query, $search)
+    {
+        return $query->where('name', 'like', "%{$search}%")
+            ->orWhere('email', 'like', "%{$search}%");
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
+            $user->profile()->delete(); // Hapus profile saat user dihapus
+        });
+    }
+
     public function profile()
     {
         return $this->hasOne(Profile::class);
@@ -58,5 +72,10 @@ class User extends Authenticatable
     public function nutritionTargets()
     {
         return $this->hasMany(NutritionTarget::class);
+    }
+
+    public function WeightLog()
+    {
+        return $this->hasMany(WeightLog::class);
     }
 }

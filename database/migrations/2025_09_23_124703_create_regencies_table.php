@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('regencies', function (Blueprint $table) {
             $table->char('id', 4)->primary();
+
             $table->char('province_id', 2);
             $table->string('name', 255);
             $table->timestamps();

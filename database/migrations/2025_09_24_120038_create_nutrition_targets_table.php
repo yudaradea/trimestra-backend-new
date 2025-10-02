@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('nutrition_targets', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuid('user_id')->unique();
+            $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
+            $table->unique(['user_id', 'date']);
+
+            $table->date('date');
             $table->float('calories', 8, 2);
             $table->float('protein', 8, 2);
             $table->float('carbohydrates', 8, 2);

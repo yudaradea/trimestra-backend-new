@@ -17,17 +17,19 @@ return new class extends Migration
             $table->uuid('user_id')->unique();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-            $table->date('birt_date');
+            $table->date('birth_date');
             $table->float('height', 8, 2);
             $table->float('weight', 8, 2);
-            $table->string('foto_profil')->nullable();
+            $table->string('foto_profile')->nullable();
             $table->string('no_hp');
             $table->enum('sleep_duration', ['<7', '7-9', '9-11']);
+            $table->json('food_allergies')->nullable();
             $table->boolean('is_pregnant')->default(false);
             $table->integer('trimester')->nullable();
             $table->integer('weeks')->nullable();
             $table->date('hpht')->nullable();
-            $table->string('imt')->nullable();
+            $table->string('bmi')->nullable();
+            $table->string('bmi_category')->nullable();
 
             $table->uuid('province_id')->nullable();
             $table->foreign('province_id')->references('id')->on('provinces');

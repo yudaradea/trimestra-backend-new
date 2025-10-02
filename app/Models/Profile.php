@@ -12,12 +12,15 @@ class Profile extends Model
 
     protected $fillable = [
         'user_id',
-        'birt_date',
+        'birth_date',
         'height',
         'weight',
-        'foto_profil',
+        'foto_profile',
         'no_hp',
         'sleep_duration',
+        'food_allergies',
+        'bmi',
+        'bmi_category',
         'is_pregnant',
         'trimester',
         'weeks',
@@ -26,7 +29,14 @@ class Profile extends Model
         'regency_id',
         'district_id',
         'village_id',
-        'imt',
+
+    ];
+
+
+    protected $casts = [
+        'is_pregnant' => 'boolean',
+        'birt_date' => 'date',
+
     ];
 
     public function user()
