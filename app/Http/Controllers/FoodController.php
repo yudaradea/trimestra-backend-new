@@ -8,6 +8,7 @@ use App\Http\Requests\Food\UpdateRequest;
 use App\Http\Resources\FoodResource;
 use App\Http\Resources\PaginateResource;
 use App\Interfaces\FoodRepositoryInterface;
+use App\Models\Food;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -25,7 +26,7 @@ class FoodController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('admin', except: ['index', 'show', 'getAllPaginated']),
+            new Middleware('admin', except: ['index', 'show', 'getAllPaginated', 'getRecomendedFoods']),
         ];
     }
     /**
@@ -67,6 +68,30 @@ class FoodController extends Controller implements HasMiddleware
         } catch (Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
+    }
+
+    public function getRecomendedFoods(Request $request)
+    {
+        $profile = $request->user()->profile;
+
+        // Jika user belum punya profile atau tidak punya alergi → random food
+        if (!$profile || empty($profile->food_allergies) || $profile->food_allergies == 'tidak punya') {
+            $foods = Food::inRandomOrder()->limit(8)->get();
+            return ResponseHelper::jsonResponse(true, 'Data makanan berhasil diambil', FoodResource::collection($foods), 200);
+        }
+
+        // Jika punya alergi → exclude makanan dengan alergi tsb
+        $allergies = json_encode($profile->food_allergies);
+
+        $foods = Food::where(function ($query) use ($allergies) {
+            $query->whereRaw("NOT JSON_OVERLAPS(allergies, ?)", [$allergies])
+                ->orWhereNull('allergies');
+        })
+            ->inRandomOrder()
+            ->limit(8)
+            ->get();
+
+        return ResponseHelper::jsonResponse(true, 'Data makanan berhasil diambil', FoodResource::collection($foods), 200);
     }
 
     /**

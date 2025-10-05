@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             FoodCategorySeeder::class,
             FoodSeeder::class,
             ExerciseSeeder::class,
+            AllergySeeder::class
         ]);
     }
 }

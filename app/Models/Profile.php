@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\NutritionService;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -36,6 +37,7 @@ class Profile extends Model
     protected $casts = [
         'is_pregnant' => 'boolean',
         'birt_date' => 'date',
+        'food_allergies' => 'array',
 
     ];
 
@@ -62,5 +64,16 @@ class Profile extends Model
     public function village()
     {
         return $this->belongsTo(Village::class);
+    }
+
+    // public function getAllergiesAttribute()
+    // {
+    //     return Allergy::whereIn('name', $this->food_allergies ?? [])->get();
+    // }
+
+    public function getTargetWeightAttribute()
+    {
+        $service = app(NutritionService::class);
+        return $service->calculateTargetWeight($this);
     }
 }

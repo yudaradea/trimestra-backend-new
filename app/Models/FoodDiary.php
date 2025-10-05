@@ -33,4 +33,9 @@ class FoodDiary extends Model
     {
         return $this->hasMany(FoodDiaryItem::class, 'food_diary_id');
     }
+
+    public function getDateAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value)->timezone('Asia/Jakarta')->toDateString();
+    }
 }

@@ -20,6 +20,7 @@ class StoreRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'allergies' => 'nullable|array|exists:allergies,name',
             'calories' => 'required|numeric|min:0',
             'protein' => 'required|numeric|min:0',
             'fat' => 'required|numeric|min:0',

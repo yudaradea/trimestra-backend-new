@@ -36,7 +36,7 @@ class StoreRequest extends FormRequest
             'foto_profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // max 2MB
             'no_hp' => 'required|string|max:20',
             'sleep_duration' => 'required|string|in:<7,7-9,9-11',
-            'food_allergies' => 'nullable|string|max:255',
+            'food_allergies' => 'nullable|array|exists:allergies,name',
             'is_pregnant' => 'required|boolean',
             'weeks' => 'nullable|required_if:is_pregnant,true|integer',
             'hpht' => 'nullable|required_if:is_pregnant,true|date',

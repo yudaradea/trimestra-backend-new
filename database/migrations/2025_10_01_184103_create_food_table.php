@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('image')->nullable();
+            $table->json('allergies')->nullable();
             $table->float('calories', 8, 2);
             $table->float('protein', 8, 2);
             $table->float('carbohydrates', 8, 2);

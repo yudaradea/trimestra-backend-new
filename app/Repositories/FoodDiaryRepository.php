@@ -60,7 +60,7 @@ class FoodDiaryRepository implements FoodDiaryRepositoryInterface
             ]);
 
             // memasukan data item makanan
-            foreach ($data['food_diary_item'] as $item) {
+            foreach ($data['items'] as $item) {
                 $foodDiary->foodDiaryItem()->create([
                     'food_diary_id' => $foodDiary->id,
                     'food_id' => $item['food_id'] ?? null,

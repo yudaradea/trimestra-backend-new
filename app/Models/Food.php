@@ -14,6 +14,7 @@ class Food extends Model
         'name',
         'description',
         'image',
+        'allergies',
         'calories',
         'protein',
         'carbohydrates',
@@ -25,6 +26,7 @@ class Food extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'allergies' => 'array',
     ];
 
     public function foodCategory()
@@ -36,4 +38,9 @@ class Food extends Model
     {
         return $query->where('name', 'like', "%{$search}%");
     }
+
+    // public function getAllergiesAttribute()
+    // {
+    //     return Allergy::whereIn('name', $this->allergies ?? [])->get();
+    // }
 }

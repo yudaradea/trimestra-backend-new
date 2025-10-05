@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('food_diaries', function (Blueprint $table) {
+        Schema::create('allergies', function (Blueprint $table) {
             $table->uuid('id')->primary();
-
-            $table->uuid('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->date('date');
-            $table->enum('type', ['breakfast', 'lunch', 'dinner', 'snack'])->default('breakfast');
-            $table->unique(['user_id', 'type', 'date']);
+            $table->string('name');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('food_diaries');
+        Schema::dropIfExists('allergies');
     }
 };

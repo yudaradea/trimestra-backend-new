@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\NutritionRequirement;
 use App\Models\NutritionTarget;
 use App\Models\Profile;
+use App\Models\WeightTarget;
 
 class NutritionService
 {
@@ -53,6 +54,43 @@ class NutritionService
         return $query->first();
     }
 
+    public function calculateTargetWeight($profile)
+    {
+        if ($profile->is_pregnant) {
+            $initialWeight = $profile->initial_weight ?? $profile->weight;
+            $weeks = $profile->weeks ?? 0;
+            $gain = 0;
+
+            if ($weeks <= 13) {
+                // Trimester 1
+                $gain = 1.75 * ($weeks / 13); // proporsional dari total 1.75 kg
+            } elseif ($weeks <= 27) {
+                // Trimester 2
+                $gain = 1.75 + (0.375 * ($weeks - 13)); // lanjut dari trimester 1
+            } elseif ($weeks <= 40) {
+                // Trimester 3
+                $gain = 1.75 + (0.375 * 14) + (0.25 * ($weeks - 27));
+            } else {
+                // jika lebih dari 40 minggu, anggap maksimum
+                $gain = 1.75 + (0.375 * 14) + (0.25 * 13);
+            }
+
+            $expectedWeight = $initialWeight + $gain;
+            return round($expectedWeight, 1);
+        }
+
+        // === Jalur untuk non-hamil ===
+        if ($profile->height) {
+            $heightM = $profile->height / 100;
+            $targetWeight = 21.7 * ($heightM ** 2); // BMI ideal rata-rata 21.7
+            return round($targetWeight, 1);
+        }
+
+        return null;
+    }
+
+
+
     public function updateProfileAndNutrition($id)
     {
         $profile = Profile::where('user_id', $id)->first();
@@ -99,6 +137,22 @@ class NutritionService
                 ]
 
             );
+        }
+
+        if ($profile->weight && $profile->height) {
+            $expectedWeight = $this->calculateTargetWeight($profile);
+
+            if ($expectedWeight) {
+                WeightTarget::updateOrCreate(
+                    [
+                        'user_id' => $profile->user_id,
+                        'week' => $profile->is_pregnant ? $profile->weeks : null,
+                    ],
+                    [
+                        'expected_weight' => $expectedWeight,
+                    ]
+                );
+            }
         }
 
         return $profile;

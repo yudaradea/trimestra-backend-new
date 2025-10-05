@@ -19,8 +19,8 @@ class StoreUpdateRequest extends FormRequest
             'date' => 'required|date',
             'type' => 'required|in:breakfast,lunch,dinner,snack',
             'items' => 'required|array',
-            'items.*.food_id' => 'nullable|uuid|exists:foods,id',
-            'items.*.user_food_id' => 'nullable|uuid|exists:user_foods,id',
+            'items.*.food_id' => 'nullable|uuid|exists:food,id',
+            'items.*.user_food_id' => 'nullable|uuid|exists:user_food,id',
             'items.*.quantity' => 'nullable|numeric|min:0.01',
         ];
     }

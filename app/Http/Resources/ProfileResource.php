@@ -18,12 +18,14 @@ class ProfileResource extends JsonResource
             'birth_date' => $this->birth_date,
             'height' => $this->height,
             'weight' => $this->weight,
+            'food_allergies' => $this->food_allergies,
             'foto_profile' => $this->foto_profile ? asset('storage/' . $this->foto_profile) : null,
             'no_hp' => $this->no_hp,
             'sleep_duration' => $this->sleep_duration,
             'calculated_bmi' => [
                 'bmi' => $this->bmi,
-                'bmi_category' => $this->bmi_category
+                'bmi_category' => $this->bmi_category,
+                'target_weight' => $this->target_weight
             ],
             'is_pregnant' => $this->is_pregnant,
             'weeks' => $this->weeks,

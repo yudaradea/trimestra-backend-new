@@ -22,6 +22,7 @@ class FoodResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'image_url' => $this->image ? asset('storage/' . $this->image) : asset('images/food/default.png'),
+            'allergy_ids' => $this->allergies,
             'calories' => $this->calories,
             'protein' => $this->protein,
             'fat' => $this->fat,

@@ -26,37 +26,11 @@ class AuthRepository implements AuthRepositoryInterface
 
             $user = User::create($userData);
 
-            // Menggunakan Arr::except untuk mengambil semua data kecuali data user
-            $profileData = Arr::except($data, ['name', 'email', 'password']);
-
-            if (isset($profileData['weight'])) {
-                WeightLog::updateOrCreate([
-                    'user_id' => $user->id,
-                    'date' => now()->toDateString(),
-                ], [
-
-                    'weight' => $profileData['weight'],
-                ]);
-            }
-
-            //    menambahkan path untuk foto profile jika registrasi berhasil
-            if (isset($data['foto_profile']) && $data['foto_profile']->isValid()) {
-                // Simpan path ke variabel yang sudah didefinisikan di atas
-                $profilePhotoPath = $data['foto_profile']->store('assets/profile', 'public');
-                $profileData['foto_profile'] = $profilePhotoPath;
-            }
-
-            //    Buat profile menggunakan relasi eloquent
-            $user->profile()->create($profileData);
-
-
             DB::commit();
             return $user;
         } catch (Exception $e) {
             DB::rollBack();
-            if ($profilePhotoPath) {
-                Storage::disk('public')->delete($profilePhotoPath);
-            }
+
             throw new Exception($e->getMessage());
         }
     }

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\Profile;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
 
     /**
@@ -16,25 +16,18 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' .  $this->route('user'),
-            'role' => 'sometimes|string|in:admin,user',
-            'password' => 'nullable|string|min:8',
-
-            // aturan untuk update profile
-            'birth_date' => 'sometimes|required|date',
-            'height' => 'sometimes|required|numeric|min:0',
-            'weight' => 'sometimes|required|numeric|min:0',
-            'foto_profile' => 'nullable|file|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'no_hp' => 'sometimes|required|string|max:20',
-            'sleep_duration' => 'sometimes|required|string|in:<7,7-9,9-11',
+            'birth_date' => 'required|date',
+            'height' => 'required|numeric|min:0',
+            'weight' => 'required|numeric|min:0',
+            'foto_profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // max 2MB
+            'no_hp' => 'required|string|max:20',
+            'sleep_duration' => 'required|string|in:<7,7-9,9-11',
             'food_allergies' => 'nullable|array|exists:allergies,name',
-            'is_pregnant' => 'sometimes|required|boolean',
+            'is_pregnant' => 'required|boolean',
             'weeks' => 'nullable|required_if:is_pregnant,true|integer',
             'hpht' => 'nullable|required_if:is_pregnant,true|date',
-            'province_id' => 'sometimes|required|integer|exists:provinces,id',
+            'province_id' => 'required|integer|exists:provinces,id',
             'regency_id' => [
-                'sometimes',
                 'required',
                 'integer',
                 // Pastikan ID kota ada di tabel regencies
@@ -44,7 +37,6 @@ class UpdateRequest extends FormRequest
             ],
 
             'district_id' => [
-                'sometimes',
                 'required',
                 'integer',
                 // Pastikan ID kecamatan ada di tabel districts
@@ -54,7 +46,6 @@ class UpdateRequest extends FormRequest
             ],
 
             'village_id' => [
-                'sometimes',
                 'required',
                 'integer',
                 // Pastikan ID desa ada di tabel villages
@@ -68,11 +59,6 @@ class UpdateRequest extends FormRequest
     public function attributes()
     {
         return [
-            'name' => 'nama',
-            'email' => 'email',
-            'role' => 'role',
-
-            // atribute untuk profile
             'birth_date' => 'tanggal lahir',
             'height' => 'tinggi badan',
             'weight' => 'berat badan',

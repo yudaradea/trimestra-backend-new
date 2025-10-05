@@ -31,9 +31,6 @@ class AuthController extends Controller
             $user = $this->authRepository->register($request);
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            // menambahkan bmi dan kategori bmi ke profile user baru
-            $this->nutritionService->updateProfileAndNutrition($user->id);
-
             return response()->json([
                 'user' => UserResource::make($user),
                 'token' => $token,

@@ -19,6 +19,15 @@ class NutritionTarget extends Model
         'fat',
     ];
 
+    protected $casts = [
+        'date' => 'date',
+    ];
+
+    public function getDateAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value)->timezone('Asia/Jakarta')->toDateString();
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
