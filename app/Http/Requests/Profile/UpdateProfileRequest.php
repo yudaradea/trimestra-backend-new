@@ -24,7 +24,7 @@ class UpdateProfileRequest extends FormRequest
             'birth_date' => 'sometimes|required|date',
             'height' => 'sometimes|required|numeric|min:0',
             'weight' => 'sometimes|required|numeric|min:0',
-            'foto_profile' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'no_hp' => 'sometimes|required|string|max:20',
             'sleep_duration' => 'sometimes|required|string|in:<7,7-9,9-11',
             'food_allergies' => 'nullable|array|exists:allergies,name',
