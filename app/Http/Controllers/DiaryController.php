@@ -38,34 +38,13 @@ class DiaryController extends Controller
                 ->createNutritionTargetForDate($user->id, $date);
         }
 
-        // hitung summary harian (pastikan selalu array dengan default)
+        // Pastikan summary selalu array dengan default
         $summary = $this->nutritionCalculationService->calculateDailySummary($user->id, $date) ?? [
             'calories_balance' => 0,
             'protein_intake' => 0,
             'carbohydrates_intake' => 0,
             'fat_intake' => 0,
         ];
-
-        $foodDiary = FoodDiary::where('user_id', $user->id)
-            ->where('date', $date)
-            ->with('foodDiaryItem.food', 'foodDiaryItem.userFood')
-            ->get();
-
-        $exerciseLog = ExerciseLog::where('user_id', $user->id)
-            ->where('date', $date)
-            ->with(['exercise', 'userExercise'])
-            ->get();
-
-        $weightLog = WeightLog::where('user_id', $user->id)
-            ->where('date', '<=', $date)
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        $weightLogsForChart = WeightLog::where('user_id', $user->id)
-            ->where('date', '<=', $date)
-            ->orderBy('created_at', 'desc')
-            ->take(10)
-            ->get();
 
         // hitung diff dengan aman
         $caloriesDiff = ($nutritionTarget->calories ?? 0) - ($summary['calories_balance'] ?? 0);
@@ -99,10 +78,10 @@ class DiaryController extends Controller
                 'carbohydrates' => round($carbohydratesPercentage, 2),
                 'fat' => round($fatPercentage, 2),
             ],
-            'food_diary' => FoodDiaryResource::collection($foodDiary),
-            'exercise_log' => ExerciseLogResource::collection($exerciseLog),
-            'weight_log' => $weightLog ? new WeightLogResource($weightLog) : null,
-            'weight_logs_for_chart' => WeightLogResource::collection($weightLogsForChart),
+            'food_diary' => FoodDiaryResource::collection([]), // isi query kalau perlu
+            'exercise_log' => ExerciseLogResource::collection([]),
+            'weight_log' => null,
+            'weight_logs_for_chart' => [],
         ]);
     }
 }
