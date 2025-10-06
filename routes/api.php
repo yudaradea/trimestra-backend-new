@@ -49,6 +49,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Profile
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile', [ProfileController::class, 'store']);
+    Route::post('/profile', [ProfileController::class, 'update']);
     Route::put('/profile', [ProfileController::class, 'update']);
 
     // Weight logs

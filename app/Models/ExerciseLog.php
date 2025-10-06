@@ -54,11 +54,11 @@ class ExerciseLog extends Model
 
     public function exercise()
     {
-        return $this->belongsTo(Exercise::class);
+        return $this->belongsTo(Exercise::class, 'exercise_id');
     }
 
     public function userExercise()
     {
-        return $this->belongsTo(UserExercise::class);
+        return $this->belongsTo(UserExercise::class, 'user_exercise_id');
     }
 }

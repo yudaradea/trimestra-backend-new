@@ -76,33 +76,41 @@ class ExerciseLogController extends Controller
         try {
             $data = $request->validated();
 
-            $exercise = null;
             $caloriesBurndPerMinute = 0;
 
-            if ($data['exercise_id']) {
-                $exercise = Exercise::findOrFail($data['exercise_id']);
+            $exerciseId = $data['exercise_id'] ?? null;
+            $userExerciseId = $data['user_exercise_id'] ?? null;
+
+            if ($exerciseId) {
+                $exercise = Exercise::findOrFail($exerciseId);
                 $caloriesBurndPerMinute = $exercise->calories_burned_per_minute;
-            } elseif ($data['user_exercise_id']) {
-                $userExercise = UserExercise::findOrFail($data['user_exercise_id']);
+            } elseif ($userExerciseId) {
+                $userExercise = UserExercise::findOrFail($userExerciseId);
                 $caloriesBurndPerMinute = $userExercise->calories_burned_per_minute;
             }
 
             $caloriesBurned = $caloriesBurndPerMinute * $data['duration'];
 
             $exerciseLogs = ExerciseLog::create([
-                'user_id' => $user->id,
-                'exercise_id' => $data['exercise_id'] ?? null,
-                'user_exercise_id' => $data['user_exercise_id'] ?? null,
-                'duration' => $data['duration'],
-                'calories_burned' => $caloriesBurned,
-                'date' => $data['date'],
+                'user_id'          => $user->id,
+                'exercise_id'      => $exerciseId,
+                'user_exercise_id' => $userExerciseId,
+                'duration'         => $data['duration'],
+                'calories_burned'  => $caloriesBurned,
+                'date'             => $data['date'],
             ]);
 
-            return ResponseHelper::jsonResponse(true, 'Data Berhasil Disimpan', ExerciseLogResource::make($exerciseLogs->load(['exercise', 'userExercise'])), 200);
+            return ResponseHelper::jsonResponse(
+                true,
+                'Data Berhasil Disimpan',
+                ExerciseLogResource::make($exerciseLogs->load(['exercise', 'userExercise'])),
+                200
+            );
         } catch (Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 400);
         }
     }
+
 
     /**
      * Display the specified resource.
