@@ -45,6 +45,15 @@ class DiaryController extends Controller
             'carbohydrates_intake' => 0,
             'fat_intake' => 0,
         ];
+        $exerciseLog = ExerciseLog::where('user_id', $user->id)
+            ->where('date', $date)
+            ->with(['exercise', 'userExercise'])
+            ->get();
+
+        $foodDiary = FoodDiary::where('user_id', $user->id)
+            ->where('date', $date)
+            ->with(['foodDiaryItem', 'foodDiaryItem.food', 'foodDiaryItem.userFood'])
+            ->get();
 
         // hitung diff dengan aman
         $caloriesDiff = ($nutritionTarget->calories ?? 0) - ($summary['calories_balance'] ?? 0);
@@ -78,8 +87,10 @@ class DiaryController extends Controller
                 'carbohydrates' => round($carbohydratesPercentage, 2),
                 'fat' => round($fatPercentage, 2),
             ],
-            'food_diary' => FoodDiaryResource::collection([]), // isi query kalau perlu
-            'exercise_log' => ExerciseLogResource::collection([]),
+            'food_diary' => FoodDiaryResource::collection($foodDiary), // isi query kalau perlu
+
+            'exercise_log' => ExerciseLogResource::collection($exerciseLog),
+
             'weight_log' => null,
             'weight_logs_for_chart' => [],
         ]);

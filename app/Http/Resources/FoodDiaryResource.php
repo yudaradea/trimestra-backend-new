@@ -18,7 +18,7 @@ class FoodDiaryResource extends JsonResource
             'id' => $this->id,
             'date' => $this->date,
             'type' => $this->type,
-            'items' => foodDiaryItemResource::collection($this->foodDiaryItem),
+            'items' => FoodDiaryItemResource::collection($this->whenLoaded('foodDiaryItem', $this->foodDiaryItem ?? collect())),
         ];
     }
 }
