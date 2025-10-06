@@ -9,6 +9,7 @@ use App\Http\Resources\PaginateResource;
 use App\Interfaces\FoodDiaryRepositoryInterface;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class FoodDiaryController extends Controller
 {
@@ -24,17 +25,33 @@ class FoodDiaryController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        if (!$user) {
+            return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 401);
+        }
+
         try {
             $foodDiaries = $this->foodDiaryRepository->getAll(
                 $user->id,
                 $request->search,
-                $request->limit,
-                $request->filterByDate,
+                $request->limit ?? 10, // kasih default
+                $request->filterByDate ?? now()->toDateString(),
                 true
             );
-            return ResponseHelper::jsonResponse(true, 'Data Food Diary berhasil diambil', FoodDiaryResource::collection($foodDiaries), 200);
-        } catch (Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+
+            return ResponseHelper::jsonResponse(
+                true,
+                'Data Food Diary berhasil diambil',
+                FoodDiaryResource::collection($foodDiaries),
+                200
+            );
+        } catch (\Throwable $e) {
+            Log::error('FoodDiary index error', [
+                'user_id' => $user->id ?? null,
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            return ResponseHelper::jsonResponse(false, 'Internal Server Error', null, 500);
         }
     }
 
