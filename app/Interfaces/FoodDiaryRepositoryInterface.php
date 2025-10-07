@@ -9,13 +9,14 @@ interface FoodDiaryRepositoryInterface
         ?string $search,
         ?int $limit,
         // filter dengan tanggal
-        ?string $filterByDate,
+        ?string $date,
         bool $execute
     );
 
     public function getAllPaginated(
         $userId,
         ?string $search,
+        ?string $date,
         ?int $rowPerPage
     );
 

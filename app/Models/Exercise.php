@@ -24,6 +24,7 @@ class Exercise extends Model
 
     public function scopeSearch($query, $search)
     {
+        if (!$search || trim($search) == '') return $query;
         return $query->where('name', 'like', "%{$search}%");
     }
 

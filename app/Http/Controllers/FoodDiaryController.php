@@ -29,12 +29,14 @@ class FoodDiaryController extends Controller
             return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 401);
         }
 
+
+
         try {
             $foodDiaries = $this->foodDiaryRepository->getAll(
                 $user->id,
                 $request->search,
-                $request->limit ?? 10, // kasih default
-                $request->filterByDate ?? now()->toDateString(),
+                $request->limit ?? 10,
+                $request->date ?? now()->toDateString(), // kasih default
                 true
             );
 
@@ -67,7 +69,7 @@ class FoodDiaryController extends Controller
                 $user->id,
                 $request->search,
                 $request->row_per_page,
-                $request->filterByDate
+                $request->date ?? now()->toDateString()
             );
             return ResponseHelper::jsonResponse(true, 'Data Food Diary berhasil diambil', PaginateResource::make($foodDiaries, FoodDiaryResource::class), 200);
         } catch (Exception $e) {

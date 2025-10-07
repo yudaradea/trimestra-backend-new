@@ -9,13 +9,17 @@ use Illuminate\Support\Facades\DB;
 
 class ExerciseRepository implements ExerciseRepositoryInterface
 {
-    public function getAll(?string $search, ?int $limit, bool $execute)
+    public function getAll(?string $search, ?int $limit, ?string $jenis, bool $execute,)
     {
         $query = Exercise::where(function ($query) use ($search) {
             if ($search) {
                 $query->search($search);
             }
-        });
+        })->where('is_active', true);
+
+        if ($jenis) {
+            $query->where('jenis', $jenis);
+        }
 
         if ($limit) {
             $query->take($limit);
@@ -28,9 +32,9 @@ class ExerciseRepository implements ExerciseRepositoryInterface
         return $query->orderBy('created_at', 'desc');
     }
 
-    public function getAllPaginated(?string $search, ?int $rowPerPage)
+    public function getAllPaginated(?string $search, ?int $rowPerPage, ?string $jenis)
     {
-        $query = $this->getAll($search, $rowPerPage, false);
+        $query = $this->getAll($search, $rowPerPage, $jenis, false);
 
         return $query->paginate($rowPerPage);
     }

@@ -4,9 +4,9 @@ namespace App\Interfaces;
 
 interface ExerciseRepositoryInterface
 {
-    public function getAll(?string $search, ?int $limit, bool $execute);
+    public function getAll(?string $search, ?int $limit, ?string $jenis, bool $execute);
 
-    public function getAllPaginated(?string $search, ?int $rowPerPage);
+    public function getAllPaginated(?string $search, ?int $rowPerPage, ?string $jenis);
 
     public function getById(string $id);
 

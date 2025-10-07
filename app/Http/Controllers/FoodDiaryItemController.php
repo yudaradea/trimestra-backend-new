@@ -107,7 +107,7 @@ class FoodDiaryItemController extends Controller
 
             $item->delete();
 
-            // check apakah diary id masih punya item
+            // check apakah diary id masih punya item untuk tanggal ini
             $itemCount = FoodDiaryItem::where('food_diary_id', $foodDiaryId)->count();
             if ($itemCount === 0) {
                 FoodDiary::where('id', $foodDiaryId)->delete();

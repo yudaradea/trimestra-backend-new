@@ -10,16 +10,13 @@ use Illuminate\Support\Facades\DB;
 
 class FoodDiaryRepository implements FoodDiaryRepositoryInterface
 {
-    public function getAll($userId, ?string $search, ?int $limit, ?string $filterByDate, bool $execute)
+    public function getAll($userId, ?string $search, ?int $limit, ?string $date, bool $execute)
     {
-        $query = FoodDiary::where('user_id', $userId)->where(function ($query) use ($search, $filterByDate) {
+        $query = FoodDiary::where('user_id', $userId)->where(function ($query) use ($search) {
             if ($search) {
                 $query->search($search);
             }
-            if ($filterByDate) {
-                $query->where('date', $filterByDate);
-            }
-        })->with('foodDiaryItem.food', 'foodDiaryItem.userFood');
+        })->where('date', $date)->with('foodDiaryItem.food', 'foodDiaryItem.userFood');
 
         if ($limit) {
             $query->take($limit);
@@ -32,9 +29,9 @@ class FoodDiaryRepository implements FoodDiaryRepositoryInterface
         return $query->orderBy('created_at', 'desc');
     }
 
-    public function getAllPaginated($userId, ?string $search, ?int $rowPerPage)
+    public function getAllPaginated($userId, ?string $search, ?string $date, ?int $rowPerPage)
     {
-        $query = $this->getAll($userId, $search, $rowPerPage, null, false);
+        $query = $this->getAll($userId, $search, $rowPerPage, $date, false);
 
         return $query->paginate($rowPerPage);
     }

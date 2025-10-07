@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Log;
 
 class Exercisecontroller extends Controller implements HasMiddleware
 {
@@ -37,6 +38,7 @@ class Exercisecontroller extends Controller implements HasMiddleware
             $exercises = $this->exerciseRepository->getAll(
                 $request->search,
                 $request->limit,
+                $request->jenis,
                 true
             );
 
@@ -50,18 +52,32 @@ class Exercisecontroller extends Controller implements HasMiddleware
     {
         $request->validate([
             'search' => 'nullable|string',
+
             'row_per_page' => 'required|integer',
+            'jenis' => 'nullable|string',
         ]);
 
         try {
             $exercises = $this->exerciseRepository->getAllPaginated(
                 $request->search,
-                $request->row_per_page
+                $request->row_per_page ?? 10,
+                $request->jenis ?? '',
             );
 
             return ResponseHelper::jsonResponse(true, 'Data latihan berhasil diambil', PaginateResource::make($exercises, ExerciseResource::class), 200);
         } catch (Exception $e) {
+            Log::error('Exercise pagination error: ' . $e->getMessage(), [
+                'search' => $request->search,
+                'jenis' => $request->jenis,
+                'row_per_page' => $request->row_per_page,
+            ]);
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+
+        $user = $request->user();
+        if (!$user) {
+            Log::error('User tidak terautentikasi');
+            return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 401);
         }
     }
 
