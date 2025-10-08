@@ -11,6 +11,8 @@ use App\Models\FoodDiary;
 use App\Models\NutritionTarget;
 use App\Models\WeightLog;
 use App\Services\NutritionCalculationService;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 
 use function Pest\Laravel\json;
@@ -94,5 +96,65 @@ class DiaryController extends Controller
             'weight_log' => null,
             'weight_logs_for_chart' => [],
         ]);
+    }
+
+    public function nutritionReport(Request $request)
+    {
+        $user = $request->user();
+        $start = Carbon::parse($request->query('start_date'));
+        $end = Carbon::parse($request->query('end_date'));
+
+        $days = CarbonPeriod::create($start, $end);
+        $report = [];
+
+        foreach ($days as $day) {
+            $date = $day->toDateString();
+
+            $nutritionTarget = NutritionTarget::where('user_id', $user->id)
+                ->where('date', $date)
+                ->first();
+
+            if (!$nutritionTarget) {
+                $nutritionTarget = app(NutritionCalculationService::class)
+                    ->createNutritionTargetForDate($user->id, $date);
+            }
+
+            $summary = app(NutritionCalculationService::class)
+                ->calculateDailySummary($user->id, $date) ?? [
+                    'calories_balance' => 0,
+                    'protein_intake' => 0,
+                    'carbohydrates_intake' => 0,
+                    'fat_intake' => 0,
+                ];
+
+            $percentage = [
+                'calories' => $nutritionTarget && $nutritionTarget->calories > 0
+                    ? round($summary['calories_balance'] / $nutritionTarget->calories * 100, 2)
+                    : 0,
+                'protein' => $nutritionTarget && $nutritionTarget->protein > 0
+                    ? round($summary['protein_intake'] / $nutritionTarget->protein * 100, 2)
+                    : 0,
+                'carbohydrates' => $nutritionTarget && $nutritionTarget->carbohydrates > 0
+                    ? round($summary['carbohydrates_intake'] / $nutritionTarget->carbohydrates * 100, 2)
+                    : 0,
+                'fat' => $nutritionTarget && $nutritionTarget->fat > 0
+                    ? round($summary['fat_intake'] / $nutritionTarget->fat * 100, 2)
+                    : 0,
+            ];
+
+            $report[] = [
+                'date' => $date,
+                'summary' => $summary,
+                'target' => [
+                    'calories' => $nutritionTarget->calories ?? 0,
+                    'protein' => $nutritionTarget->protein ?? 0,
+                    'carbohydrates' => $nutritionTarget->carbohydrates ?? 0,
+                    'fat' => $nutritionTarget->fat ?? 0,
+                ],
+                'percentage' => $percentage,
+            ];
+        }
+
+        return response()->json($report);
     }
 }

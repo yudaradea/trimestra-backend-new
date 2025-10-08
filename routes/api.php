@@ -92,6 +92,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Diary
     Route::get('/diary', [DiaryController::class, 'index']);
+    Route::get('/diary/report', [DiaryController::class, 'nutritionReport']);
+
 
     // alergy
     Route::apiResource('allergy', AllergyController::class);
