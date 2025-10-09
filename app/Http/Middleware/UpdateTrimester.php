@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Profile;
+use App\Services\NotificationService;
 use App\Services\NutritionService;
 use Closure;
 use Illuminate\Http\Request;
@@ -12,10 +13,12 @@ class UpdateTrimester
 {
 
     protected $nutritionService;
+    protected $notificationService;
 
-    public function __construct(NutritionService $nutritionService)
+    public function __construct(NutritionService $nutritionService, NotificationService $notificationService)
     {
         $this->nutritionService = $nutritionService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -32,12 +35,22 @@ class UpdateTrimester
                 $usiaKehamilan = $profile->hpht->diffInWeeks(now());
 
                 if ($usiaKehamilan !== $profile->weeks) {
+                    $newTrimester = $this->calculateTrimester($usiaKehamilan);
+
+                    if ($newTrimester !== $profile->trimester) {
+                        $this->notificationService->create(
+                            $request->user()->id,
+                            'Selamat! Kamu memasuki trimester ' . $newTrimester,
+                            'Jaga kesehatan dan perhatikan kebutuhan nutrisi di fase ini 💚',
+                            'ri-heart-line'
+                        );
+                    }
+
                     $profile->update([
                         'weeks' => $usiaKehamilan,
-                        'trimester' => $this->calculateTrimester($usiaKehamilan),
+                        'trimester' => $newTrimester,
                     ]);
 
-                    // Update nutrition requirement
                     $this->nutritionService->updateProfileAndNutrition($request->user()->id);
                 }
             }

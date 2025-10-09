@@ -73,6 +73,11 @@ class DiaryController extends Controller
         $fatPercentage = ($nutritionTarget && $nutritionTarget->fat > 0)
             ? ($summary['fat_intake'] / $nutritionTarget->fat) * 100 : 0;
 
+        app(\App\Services\NotificationService::class)->checkDailyAchievement($user, (object)[
+            'summary' => $summary,
+            'target' => $nutritionTarget,
+        ]);
+
         return response()->json([
             'date' => $date,
             'target' => $nutritionTarget ? new NutritionTargetResource($nutritionTarget) : null,

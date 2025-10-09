@@ -10,6 +10,7 @@ use App\Http\Controllers\FoodController;
 use App\Http\Controllers\FoodDiaryController;
 use App\Http\Controllers\FoodDiaryItemController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NutritionRequirementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -39,7 +40,7 @@ Route::get('/districts', [LocationController::class, 'districts']);
 Route::get('/villages', [LocationController::class, 'villages']);
 
 // sanctum route
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'update-trimester'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 
@@ -97,4 +98,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // alergy
     Route::apiResource('allergy', AllergyController::class);
+
+    // notification
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread', [NotificationController::class, 'unread']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications', [NotificationController::class, 'store']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+    Route::post('/notifications/check-achievement', [NotificationController::class, 'checkAchievement']);
 });

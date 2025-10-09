@@ -33,4 +33,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => 'Unauthenticated.',
             ], 401);
         });
-    })->create();
+    })
+    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
+        $schedule->command('reminder:daily')->dailyAt('08:00');
+    })
+    ->create();

@@ -37,6 +37,7 @@ class Profile extends Model
     protected $casts = [
         'is_pregnant' => 'boolean',
         'birt_date' => 'date',
+        'hpht' => 'date',
         'food_allergies' => 'array',
 
     ];
