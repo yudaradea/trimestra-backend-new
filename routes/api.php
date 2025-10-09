@@ -46,6 +46,7 @@ Route::middleware(['auth:sanctum', 'update-trimester'])->group(function () {
 
     // user
     Route::apiResource('user', UserController::class);
+    Route::get('/user/all/paginated', [UserController::class, 'getAllPaginated']);
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'show']);

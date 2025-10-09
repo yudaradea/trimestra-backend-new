@@ -53,6 +53,7 @@ class User extends Authenticatable
 
     public function scopeSearch($query, $search)
     {
+        // tambahkan provinsi, kabupaten, kecamatan, dan kelurahan
         return $query->where('name', 'like', "%{$search}%")
             ->orWhere('email', 'like', "%{$search}%");
     }

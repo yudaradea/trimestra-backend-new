@@ -29,16 +29,57 @@ class UserRepository implements UserRepositoryInterfaces
             return $query->get();
         }
 
-        return $query;
+        return $query->orderBy('created_at', 'desc');
     }
-
-    public function getAllPaginated(?string $search, ?int $rowPerPage)
+    public function getAllPaginated(?string $search, ?int $rowPerPage, ?array $filters = [], ?string $sortBy = null, ?string $sortDirection = 'asc')
     {
-        $query = $this->getAll($search, $rowPerPage, false);
+        $query = $this->getAll($search, null, false);
+
+        // Filter lokasi berdasarkan kolom di tabel profiles
+        if (!empty($filters['province_id'])) {
+            $query->whereHas('profile', function ($q) use ($filters) {
+                $q->where('province_id', $filters['province_id']);
+            });
+        }
+
+        if (!empty($filters['regency_id'])) {
+            $query->whereHas('profile', function ($q) use ($filters) {
+                $q->where('regency_id', $filters['regency_id']);
+            });
+        }
+
+        if (!empty($filters['district_id'])) {
+            $query->whereHas('profile', function ($q) use ($filters) {
+                $q->where('district_id', $filters['district_id']);
+            });
+        }
+
+        if (!empty($filters['village_id'])) {
+            $query->whereHas('profile', function ($q) use ($filters) {
+                $q->where('village_id', $filters['village_id']);
+            });
+        }
+
+        // sorting
+        if ($sortBy) {
+            $direction = $sortDirection ?? 'asc';
+
+            if ($sortBy === 'location') {
+                // urutkan berdasarkan province_id dari tabel profiles
+                $query->join('profiles', 'users.id', '=', 'profiles.user_id')
+                    ->orderBy('profiles.province_id', $direction)
+                    ->select('users.*'); // penting biar tidak bentrok kolom
+            } elseif ($sortBy === 'role') {
+                $query->orderBy('role', $direction);
+            } else {
+                $query->orderBy($sortBy, $direction);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
 
         return $query->paginate($rowPerPage);
     }
-
     public function getById(string $id)
     {
         $query = User::where('id', $id)->with(['profile', 'nutrition_targets']);

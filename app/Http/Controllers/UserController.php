@@ -59,7 +59,15 @@ class UserController extends Controller implements HasMiddleware
         try {
             $users = $this->userRepository->getAllPaginated(
                 $request->search,
-                $request->row_per_page
+                $request->row_per_page,
+                [
+                    'province_id' => $request->province_id,
+                    'regency_id'  => $request->regency_id,
+                    'district_id' => $request->district_id,
+                    'village_id'  => $request->village_id,
+                ],
+                $request->sort_by,
+                $request->sort_direction
             );
 
             return ResponseHelper::jsonResponse(true, 'Data user berhasil diambil', PaginateResource::make($users, UserResource::class), 200);

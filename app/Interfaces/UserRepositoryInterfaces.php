@@ -13,6 +13,9 @@ interface UserRepositoryInterfaces
     public function getAllPaginated(
         ?string $search,
         ?int $rowPerPage,
+        ?array $filters,
+        ?string $sortBy,
+        ?string $sortDirection,
     );
 
     public function getById(string $id);
