@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Interfaces\AuthRepositoryInterface;
+use App\Models\Notification;
 use App\Services\NutritionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +30,17 @@ class AuthController extends Controller
 
         try {
             $user = $this->authRepository->register($request);
+
+            Notification::create([
+                'user_id' => $user->id,
+                'title' => "Selamat Datang, $user->name 👋",
+                'message' => 'Terima kasih telah bergabung! Yuk mulai isi diary harianmu.',
+                'icon' => 'ri-hand-heart-line',
+                'type' => 'welcome',
+                'date' => now()->toDateString(),
+                'time' => now()->format('H:i:s'),
+            ]);
+
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([

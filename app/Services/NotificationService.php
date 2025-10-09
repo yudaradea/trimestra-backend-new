@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Notification;
+use App\Models\User;
 
 class NotificationService
 {
@@ -35,42 +36,45 @@ class NotificationService
             ->get();
     }
 
-    public function checkDailyAchievement($user, $report)
+    public function checkDailyAchievement(User $user, array $percentage): void
     {
-        $summary = (array)($report->summary ?? []);
-        $target = (array)($report->target ?? []);
+        $today = now()->toDateString();
 
-        if (!$summary || !$target) return;
+        $isFull = collect($percentage)->every(fn($p) => $p >= 100);
+        $isPartial = collect($percentage)->every(fn($p) => $p >= 75);
 
-        $nutrients = ['calories', 'protein', 'carbohydrates', 'fat'];
-        $achieved = 0;
-
-        foreach ($nutrients as $key) {
-            $intake = $summary["{$key}_intake"] ?? 0;
-            $goal = $target[$key] ?? 1;
-            $percent = ($intake / $goal) * 100;
-
-            if ($percent >= 100) {
-                $achieved++;
-            } elseif ($percent >= 70 && $percent < 80) {
-                $this->notifyOnce($user->id, "Kamu hampir mencapai target {$key} hari ini!", "Tinggal sedikit lagi 💪", 'ri-run-line');
-            }
-        }
-
-        if ($achieved === count($nutrients)) {
-            $this->notifyOnce($user->id, "Selamat! Kamu capai semua target hari ini 🎉", "Pertahankan konsistensimu 💚", 'ri-trophy-line');
+        if ($isFull) {
+            $this->notifyOnce($user, [
+                'type' => 'target_100',
+                'title' => 'Target Nutrisi Tercapai 🎉',
+                'message' => 'Kamu sudah memenuhi 100% semua target nutrisi harianmu. Hebat!',
+                'icon' => 'ri-trophy-line',
+            ]);
+        } elseif ($isPartial) {
+            $this->notifyOnce($user, [
+                'type' => 'target_75',
+                'title' => 'Target Nutrisi Hampir Tercapai 💪',
+                'message' => 'Kamu sudah mencapai 75% semua target nutrisi. Lanjutkan!',
+                'icon' => 'ri-run-line',
+            ]);
         }
     }
 
-    private function notifyOnce($userId, $title, $message, $icon)
+    private function notifyOnce(User $user, array $data): void
     {
-        $exists = Notification::where('user_id', $userId)
-            ->where('title', $title)
+        $exists = $user->notifications()
+            ->where('type', $data['type'])
             ->whereDate('date', now()->toDateString())
             ->exists();
 
         if (!$exists) {
-            app(NotificationService::class)->create($userId, $title, $message, $icon);
+            app(NotificationService::class)->create(
+                $user->id,
+                $data['title'],
+                $data['message'],
+                $data['icon'],
+                $data['type']
+            );
         }
     }
 

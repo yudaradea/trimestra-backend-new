@@ -10,6 +10,7 @@ use App\Models\ExerciseLog;
 use App\Models\FoodDiary;
 use App\Models\NutritionTarget;
 use App\Models\WeightLog;
+use App\Services\NotificationService;
 use App\Services\NutritionCalculationService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -30,6 +31,7 @@ class DiaryController extends Controller
     {
         $user = $request->user();
         $date = $request->date ?? now()->toDateString();
+
 
         $nutritionTarget = NutritionTarget::where('user_id', $user->id)
             ->where('date', $date)
@@ -73,10 +75,14 @@ class DiaryController extends Controller
         $fatPercentage = ($nutritionTarget && $nutritionTarget->fat > 0)
             ? ($summary['fat_intake'] / $nutritionTarget->fat) * 100 : 0;
 
-        app(\App\Services\NotificationService::class)->checkDailyAchievement($user, (object)[
-            'summary' => $summary,
-            'target' => $nutritionTarget,
-        ]);
+        $percentage = [
+            'calories' => round($caloriesPercentage, 2),
+            'protein' => round($proteinPercentage, 2),
+            'carbohydrates' => round($carbohydratesPercentage, 2),
+            'fat' => round($fatPercentage, 2),
+        ];
+
+        app(NotificationService::class)->checkDailyAchievement($user, $percentage);
 
         return response()->json([
             'date' => $date,
