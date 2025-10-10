@@ -7,6 +7,12 @@ use App\Http\Requests\FoodDiary\StoreUpdateRequest;
 use App\Http\Resources\FoodDiaryResource;
 use App\Http\Resources\PaginateResource;
 use App\Interfaces\FoodDiaryRepositoryInterface;
+use App\Models\ExerciseLog;
+use App\Models\FoodDiary;
+use App\Models\NutritionTarget;
+use App\Services\NotificationService;
+use App\Services\NutritionCalculationService;
+use App\Services\NutritionService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -14,10 +20,14 @@ use Illuminate\Support\Facades\Log;
 class FoodDiaryController extends Controller
 {
     private FoodDiaryRepositoryInterface $foodDiaryRepository;
+    private NutritionCalculationService $nutritionCalculationService;
+    private NotificationService $notificationService;
 
-    public function __construct(FoodDiaryRepositoryInterface $foodDiaryRepository)
+    public function __construct(FoodDiaryRepositoryInterface $foodDiaryRepository, NutritionCalculationService $nutritionCalculationService, NotificationService $notificationService)
     {
         $this->foodDiaryRepository = $foodDiaryRepository;
+        $this->nutritionCalculationService = $nutritionCalculationService;
+        $this->notificationService = $notificationService;
     }
     /**
      * Display a listing of the resource.
@@ -82,10 +92,49 @@ class FoodDiaryController extends Controller
      */
     public function store(StoreUpdateRequest $request)
     {
+        $user = $request->user();
         $request = $request->validated();
+        $date = $request['date'] ?? now()->toDateString();
 
         try {
             $foodDiary = $this->foodDiaryRepository->create($request);
+
+            $nutritionTarget = NutritionTarget::where('user_id', $user->id)
+                ->where('date', $date)
+                ->first();
+
+            if (!$nutritionTarget) {
+                $nutritionTarget = $this->nutritionCalculationService
+                    ->createNutritionTargetForDate($user->id, $date);
+            }
+
+            // Pastikan summary selalu array dengan default
+            $summary = $this->nutritionCalculationService->calculateDailySummary($user->id, $date) ?? [
+                'calories_balance' => 0,
+                'protein_intake' => 0,
+                'carbohydrates_intake' => 0,
+                'fat_intake' => 0,
+            ];
+
+            // percentage
+            $caloriesPercentage = ($nutritionTarget && $nutritionTarget->calories > 0)
+                ? ($summary['calories_balance'] / $nutritionTarget->calories) * 100 : 0;
+            $proteinPercentage = ($nutritionTarget && $nutritionTarget->protein > 0)
+                ? ($summary['protein_intake'] / $nutritionTarget->protein) * 100 : 0;
+            $carbohydratesPercentage = ($nutritionTarget && $nutritionTarget->carbohydrates > 0)
+                ? ($summary['carbohydrates_intake'] / $nutritionTarget->carbohydrates) * 100 : 0;
+            $fatPercentage = ($nutritionTarget && $nutritionTarget->fat > 0)
+                ? ($summary['fat_intake'] / $nutritionTarget->fat) * 100 : 0;
+
+            $percentage = [
+                'calories' => round($caloriesPercentage, 2),
+                'protein' => round($proteinPercentage, 2),
+                'carbohydrates' => round($carbohydratesPercentage, 2),
+                'fat' => round($fatPercentage, 2),
+            ];
+
+            $this->notificationService->checkDailyAchievement($user, $percentage);
+
             return ResponseHelper::jsonResponse(true, 'Food Diary Berhasil Dibuat', FoodDiaryResource::make($foodDiary), 200);
         } catch (Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
@@ -118,6 +167,7 @@ class FoodDiaryController extends Controller
     {
         $user = $request->user();
         $request = $request->validated();
+        $date = $request['date'] ?? now()->toDateString();
 
         try {
             $foodDiary = $this->foodDiaryRepository->getById($id, $user->id);
@@ -127,6 +177,42 @@ class FoodDiaryController extends Controller
             }
 
             $foodDiary = $this->foodDiaryRepository->update($id, $request, $user->id);
+
+            $nutritionTarget = NutritionTarget::where('user_id', $user->id)
+                ->where('date', $date)
+                ->first();
+
+            if (!$nutritionTarget) {
+                $nutritionTarget = $this->nutritionCalculationService
+                    ->createNutritionTargetForDate($user->id, $date);
+            }
+
+            // Pastikan summary selalu array dengan default
+            $summary = $this->nutritionCalculationService->calculateDailySummary($user->id, $date) ?? [
+                'calories_balance' => 0,
+                'protein_intake' => 0,
+                'carbohydrates_intake' => 0,
+                'fat_intake' => 0,
+            ];
+
+            // percentage
+            $caloriesPercentage = ($nutritionTarget && $nutritionTarget->calories > 0)
+                ? ($summary['calories_balance'] / $nutritionTarget->calories) * 100 : 0;
+            $proteinPercentage = ($nutritionTarget && $nutritionTarget->protein > 0)
+                ? ($summary['protein_intake'] / $nutritionTarget->protein) * 100 : 0;
+            $carbohydratesPercentage = ($nutritionTarget && $nutritionTarget->carbohydrates > 0)
+                ? ($summary['carbohydrates_intake'] / $nutritionTarget->carbohydrates) * 100 : 0;
+            $fatPercentage = ($nutritionTarget && $nutritionTarget->fat > 0)
+                ? ($summary['fat_intake'] / $nutritionTarget->fat) * 100 : 0;
+
+            $percentage = [
+                'calories' => round($caloriesPercentage, 2),
+                'protein' => round($proteinPercentage, 2),
+                'carbohydrates' => round($carbohydratesPercentage, 2),
+                'fat' => round($fatPercentage, 2),
+            ];
+
+            $this->notificationService->checkDailyAchievement($user, $percentage);
 
             return ResponseHelper::jsonResponse(true, 'Food Diary Berhasil Diupdate', FoodDiaryResource::make($foodDiary), 200);
         } catch (Exception $e) {
