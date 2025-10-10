@@ -49,6 +49,7 @@ class NotificationService
                 'title' => 'Target Nutrisi Tercapai 🎉',
                 'message' => 'Kamu sudah memenuhi 100% semua target nutrisi harianmu. Hebat!',
                 'icon' => 'ri-trophy-line',
+                'date' => $today,
             ]);
         } elseif ($isPartial) {
             $this->notifyOnce($user, [
@@ -56,6 +57,7 @@ class NotificationService
                 'title' => 'Target Nutrisi Hampir Tercapai 💪',
                 'message' => 'Kamu sudah mencapai 75% semua target nutrisi. Lanjutkan!',
                 'icon' => 'ri-run-line',
+                'date' => $today,
             ]);
         }
     }
@@ -73,7 +75,8 @@ class NotificationService
                 $data['title'],
                 $data['message'],
                 $data['icon'],
-                $data['type']
+                $data['type'],
+                $data['date']
             );
         }
     }

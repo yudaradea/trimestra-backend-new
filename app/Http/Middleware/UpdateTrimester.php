@@ -39,11 +39,13 @@ class UpdateTrimester
                     $newTrimester = $this->calculateTrimester($usiaKehamilan);
 
                     if ($newTrimester !== $profile->trimester) {
+                        $today = now()->toDateString();
                         $this->notifyOnce($request->user(), [
                             'title' => 'Selamat! Kamu memasuki trimester ke-' . $newTrimester,
                             'message' => 'Jaga kesehatan dan perhatikan kebutuhan nutrisi di fase ini 💚',
                             'icon' => 'ri-heart-line',
                             'type' => 'trimester ke' . $newTrimester,
+                            'date' => $today
                         ]);
                     }
 
@@ -73,7 +75,8 @@ class UpdateTrimester
                 $data['title'],
                 $data['message'],
                 $data['icon'],
-                $data['type']
+                $data['type'],
+                $data['date']
             );
         }
     }
