@@ -21,6 +21,11 @@ class Notification extends Model
         'read',
     ];
 
+    protected $casts = [
+        'read' => 'boolean',
+        'date' => 'date',
+    ];
+
     // Relasi ke user
     public function user()
     {
