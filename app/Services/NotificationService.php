@@ -66,7 +66,7 @@ class NotificationService
     {
         $exists = $user->notifications()
             ->where('type', $data['type'])
-            ->whereDate('created_at', now()->toDateString())
+            ->whereDate('date', now()->toDateString())
             ->exists();
 
         if (!$exists) {
