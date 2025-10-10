@@ -66,7 +66,7 @@ class UpdateTrimester
     {
         $exists = $user->notifications()
             ->where('type', $data['type'])
-            ->whereDate('date', now()->toDateString())
+            ->whereDate('date', $data['date'])
             ->exists();
 
         if (!$exists) {

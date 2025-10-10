@@ -66,7 +66,7 @@ class NotificationService
     {
         $exists = $user->notifications()
             ->where('type', $data['type'])
-            ->whereDate('date', now()->toDateString())
+            ->whereDate('date', $data['date'])
             ->exists();
 
         if (!$exists) {
@@ -78,6 +78,8 @@ class NotificationService
                 $data['type'],
                 $data['date']
             );
+        } else {
+            return;
         }
     }
 
