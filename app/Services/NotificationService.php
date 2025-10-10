@@ -7,13 +7,14 @@ use App\Models\User;
 
 class NotificationService
 {
-    public function create($userId, $title, $message = null, $icon = null)
+    public function create($userId, $title, $message = null, $icon = null, $type)
     {
         return Notification::create([
             'user_id' => $userId,
             'title' => $title,
             'message' => $message,
             'icon' => $icon,
+            'type' => $type,
             'date' => now()->toDateString(),
             'time' => now()->format('H:i'),
         ]);
