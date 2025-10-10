@@ -40,8 +40,8 @@ class NotificationService
     {
         $today = now()->toDateString();
 
-        $isFull = collect($percentage)->every(fn($p) => $p >= 100);
-        $isPartial = collect($percentage)->every(fn($p) => $p >= 75);
+        $isFull = collect($percentage)->every(fn($p) => $p == 100);
+        $isPartial = collect($percentage)->every(fn($p) => $p == 75);
 
         if ($isFull) {
             $this->notifyOnce($user, [

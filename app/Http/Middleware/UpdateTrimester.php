@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Profile;
+use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\NutritionService;
 use Closure;
@@ -38,12 +39,12 @@ class UpdateTrimester
                     $newTrimester = $this->calculateTrimester($usiaKehamilan);
 
                     if ($newTrimester !== $profile->trimester) {
-                        $this->notificationService->create(
-                            $request->user()->id,
-                            'Selamat! Kamu memasuki trimester ' . $newTrimester,
-                            'Jaga kesehatan dan perhatikan kebutuhan nutrisi di fase ini 💚',
-                            'ri-heart-line'
-                        );
+                        $this->notifyOnce($request->user(), [
+                            'title' => 'Selamat! Kamu memasuki trimester ke-' . $newTrimester,
+                            'message' => 'Jaga kesehatan dan perhatikan kebutuhan nutrisi di fase ini 💚',
+                            'icon' => 'ri-heart-line',
+                            'type' => 'trimester ke' . $newTrimester,
+                        ]);
                     }
 
                     $profile->update([
@@ -57,6 +58,24 @@ class UpdateTrimester
         }
 
         return $next($request);
+    }
+
+    private function notifyOnce(User $user, array $data): void
+    {
+        $exists = $user->notifications()
+            ->where('type', $data['type'])
+            ->whereDate('date', now()->toDateString())
+            ->exists();
+
+        if (!$exists) {
+            app(NotificationService::class)->create(
+                $user->id,
+                $data['title'],
+                $data['message'],
+                $data['icon'],
+                $data['type']
+            );
+        }
     }
 
     private function calculateTrimester($weeks)
