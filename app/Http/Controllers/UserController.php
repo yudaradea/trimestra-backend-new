@@ -13,6 +13,7 @@ use App\Services\NutritionService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller implements HasMiddleware
 {
@@ -144,12 +145,15 @@ class UserController extends Controller implements HasMiddleware
      */
     public function destroy(string $id)
     {
+
         try {
             $user = $this->userRepository->getById($id);
 
             if (!$user) {
                 return ResponseHelper::jsonResponse(false, 'User Tidak Ditemukan', null, 404);
             }
+
+
 
             $this->userRepository->delete($id);
 

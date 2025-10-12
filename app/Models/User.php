@@ -63,6 +63,8 @@ class User extends Authenticatable
         static::deleting(function ($user) {
             $user->profile()->delete(); // Hapus profile saat user dihapus
         });
+        // hapus nutrition target
+
     }
 
     public function profile()

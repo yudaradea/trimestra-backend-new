@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Models\WeightLog;
 use Exception;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class UserRepository implements UserRepositoryInterfaces
@@ -82,7 +84,7 @@ class UserRepository implements UserRepositoryInterfaces
     }
     public function getById(string $id)
     {
-        $query = User::where('id', $id)->with(['profile', 'nutrition_targets']);
+        $query = User::where('id', $id)->with(['profile', 'nutritionTargets']);
 
         return $query->first();
     }
@@ -134,14 +136,14 @@ class UserRepository implements UserRepositoryInterfaces
 
         try {
             $user = User::find($id);
-            $userData = Arr::only($data, ['name', 'email', 'password']);
+            $userData = Arr::only($data, ['name', 'email', 'password', 'role']);
             // jika ada perubahan password maka hash password baru
             if (isset($userData['password'])) {
                 $userData['password'] = bcrypt($userData['password']);
             }
             $user->update($userData);
 
-            $profileData = Arr::except($data, ['name', 'email']);
+            $profileData = Arr::except($data, ['name', 'email', 'password', 'role']);
 
 
             // menyimpan log berat badan jika ada perubahan
@@ -180,12 +182,23 @@ class UserRepository implements UserRepositoryInterfaces
     {
         DB::beginTransaction();
 
+
+        $admin = Auth::user();
+
         try {
             $user = User::find($id);
 
             // jika ada foto profile hapus
             if ($user->profile && $user->profile->foto_profile) {
                 Storage::disk('public')->delete($user->profile->foto_profile);
+            }
+
+            // jika yang menghapus adalah admin, harus masukan password
+            if ($admin->role === 'admin') {
+                $password = request('password');
+                if (!Hash::check($password, $admin->password)) {
+                    throw new Exception('Password salah');
+                }
             }
 
             $user->delete();

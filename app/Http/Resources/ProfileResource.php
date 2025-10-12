@@ -15,7 +15,7 @@ class ProfileResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'birth_date' => $this->birth_date,
+            'birth_date' => optional($this->birth_date)->format('Y-m-d'),
             'height' => $this->height,
             'weight' => $this->weight,
             'food_allergies' => $this->food_allergies,
@@ -30,7 +30,7 @@ class ProfileResource extends JsonResource
             'is_pregnant' => $this->is_pregnant,
             'weeks' => $this->weeks,
             'trimester' => $this->trimester,
-            'hpht' => $this->hpht,
+            'hpht' => optional($this->hpht)->format('Y-m-d'),
             'location' => [
                 'province_id' => $this->province_id,
                 'province_name' => $this->province->name,

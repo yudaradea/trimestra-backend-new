@@ -35,11 +35,10 @@ class Profile extends Model
 
 
     protected $casts = [
+        'birth_date' => 'date:Y-m-d',
+        'hpht' => 'date:Y-m-d',
         'is_pregnant' => 'boolean',
-        'birt_date' => 'date',
-        'hpht' => 'date',
         'food_allergies' => 'array',
-
     ];
 
     public function user()
