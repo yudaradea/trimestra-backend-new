@@ -23,6 +23,7 @@ class StoreRequest extends FormRequest
                 'max:255',
                 Rule::unique('food_categories', 'name')
             ],
+            'order' => 'nullable|integer',
             'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }

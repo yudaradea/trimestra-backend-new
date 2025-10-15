@@ -17,6 +17,7 @@ class FoodCategoryResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'order' => $this->order,
             'icon_url' => $this->icon ? asset('storage/' . $this->icon) : asset('images/food_category/default.png'),
         ];
     }

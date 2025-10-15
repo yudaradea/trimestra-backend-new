@@ -27,7 +27,7 @@ class StoreRequest extends FormRequest
             'carbohydrates' => 'required|numeric|min:0',
             'ukuran_satuan' => 'required|numeric|max:255',
             'ukuran_satuan_nama' => 'nullable|string|max:255',
-            'is_active' => 'required|boolean'
+            'is_active' => 'nullable|boolean'
         ];
     }
 

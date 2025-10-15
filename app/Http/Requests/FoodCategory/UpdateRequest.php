@@ -24,6 +24,7 @@ class UpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique('food_categories', 'name')->ignore($this->route('food_category'))
             ],
+            'order' => 'nullable|integer',
             'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }

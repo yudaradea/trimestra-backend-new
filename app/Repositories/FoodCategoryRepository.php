@@ -5,14 +5,16 @@ namespace App\Repositories;
 use App\Interfaces\FoodCategoryRepositoryInterfaces;
 use App\Models\FoodCategory;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class FoodCategoryRepository implements FoodCategoryRepositoryInterfaces
 {
     public function getAll()
     {
-        return FoodCategory::orderBy('created_at', 'desc')->get();
+        return FoodCategory::orderBy('order', 'asc')->get();
     }
 
     public function getById(string $id)
