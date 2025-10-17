@@ -18,7 +18,7 @@ class UpdateRequest extends FormRequest
         return [
             'bmi_category' => 'required|string|in:underweight,normal,overweight,obese',
             'is_pregnant' => 'required|boolean',
-            'trimester' => 'required|integer|between:1,3',
+            'trimester' => 'nullable|integer|between:1,3',
             'calories' => 'required|integer',
             'protein' => 'required|numeric',
             'carbohydrates' => 'required|numeric',
