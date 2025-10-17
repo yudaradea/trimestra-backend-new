@@ -12,7 +12,7 @@ class NutritionRequirementsRepository implements NutritionRequirementsRepository
 {
     public function getAll()
     {
-        return NutritionRequirement::orderBy('created_at', 'desc')->get();
+        return NutritionRequirement::orderBy('is_pregnant')->get();
     }
 
     public function getById(string $id)
