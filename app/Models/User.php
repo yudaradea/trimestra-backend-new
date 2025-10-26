@@ -106,4 +106,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+
+    public function devices()
+    {
+        return $this->hasOne(Device::class);
+    }
 }

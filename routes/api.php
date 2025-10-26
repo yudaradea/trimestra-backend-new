@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AllergyController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\Exercisecontroller;
 use App\Http\Controllers\ExerciseLogController;
@@ -107,4 +108,20 @@ Route::middleware(['auth:sanctum', 'update-trimester'])->group(function () {
     Route::post('/notifications', [NotificationController::class, 'store']);
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
     Route::post('/notifications/check-achievement', [NotificationController::class, 'checkAchievement']);
+
+    // device
+    Route::prefix('device')->group(function () {
+        // custom endpoints (letakkan duluan)
+        Route::post('/link', [DeviceController::class, 'link']);
+        Route::get('/status', [DeviceController::class, 'status']);
+        Route::get('/linked-devices', [DeviceController::class, 'linkedDevices']);
+        Route::post('/{device}/sync', [DeviceController::class, 'sync']);
+
+        // resource routes (letakkan paling bawah)
+        Route::get('/', [DeviceController::class, 'index']);
+        Route::post('/', [DeviceController::class, 'store']);
+        Route::get('/{device}', [DeviceController::class, 'show']);
+        Route::put('/{device}', [DeviceController::class, 'update']);
+        Route::delete('/{device}', [DeviceController::class, 'destroy']);
+    });
 });
