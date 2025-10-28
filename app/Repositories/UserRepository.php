@@ -21,7 +21,7 @@ class UserRepository implements UserRepositoryInterfaces
             if ($search) {
                 $query->search($search);
             }
-        })->with(['profile', 'nutritionTargets']);
+        })->with(['profile', 'nutritionTargets', 'devices']);
 
         if ($limit) {
             $query->take($limit);
@@ -84,7 +84,7 @@ class UserRepository implements UserRepositoryInterfaces
     }
     public function getById(string $id)
     {
-        $query = User::where('id', $id)->with(['profile', 'nutritionTargets']);
+        $query = User::where('id', $id)->with(['profile', 'nutritionTargets', 'devices']);
 
         return $query->first();
     }

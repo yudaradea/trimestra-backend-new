@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'profile' => new ProfileResource($this->whenLoaded('profile')),
             'nutrition_targets' => NutritionTargetResource::collection($this->whenLoaded('nutritionTargets')),
+            'devices' => $this->devices,
             'created_at' => $this->created_at,
         ];
     }

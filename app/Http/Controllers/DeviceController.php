@@ -25,7 +25,22 @@ class DeviceController extends Controller implements HasMiddleware
     {
         $perPage = $request->get('per_page', 10);
 
-        $devices = Device::orderBy('created_at', 'desc')->paginate($perPage);
+        // search by device_name or device_code or user name or user email
+
+        $devices = Device::where(function ($query) use ($request) {
+            $search = $request->get('search');
+            if ($search) {
+                $query->where('device_name', 'like', "%$search%")
+                    ->orWhere('device_code', 'like', "%$search%")
+                    ->orWhereHas('user', function ($q) use ($search) {
+                        $q->where('name', 'like', "%$search%")
+                            ->orWhere('email', 'like', "%$search%");
+                    });
+            }
+        })
+            ->with('user:id,name,email')
+            ->orderBy('registered_at', 'desc')
+            ->paginate($perPage);
 
         return DeviceResource::collection($devices);
     }
@@ -34,7 +49,19 @@ class DeviceController extends Controller implements HasMiddleware
     {
         $perPage = $request->get('per_page', 10);
 
+        //  search by device_name or device_code or user name or user email
         $devices = Device::whereNotNull('user_id')
+            ->where(function ($query) use ($request) {
+                $search = $request->get('search');
+                if ($search) {
+                    $query->where('device_name', 'like', "%$search%")
+                        ->orWhere('device_code', 'like', "%$search%")
+                        ->orWhereHas('user', function ($q) use ($search) {
+                            $q->where('name', 'like', "%$search%")
+                                ->orWhere('email', 'like', "%$search%");
+                        });
+                }
+            })
             ->with('user:id,name,email')
             ->orderBy('registered_at', 'desc')
             ->paginate($perPage);
@@ -86,6 +113,11 @@ class DeviceController extends Controller implements HasMiddleware
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
             'device_code' => 'required|string|exists:devices,device_code',
+        ], [
+            'user_id.exists' => 'User not found',
+            'device_code.required' => 'Device code tidak boleh kosong',
+            'device_code.string' => 'Device code harus berupa string',
+            'device_code.exists' => 'Device tidak ditemukan',
         ]);
 
         // nonaktifkan device lama user (jika hanya boleh 1 aktif)
