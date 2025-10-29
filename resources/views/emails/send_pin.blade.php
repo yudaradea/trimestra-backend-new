@@ -1,28 +1,40 @@
 @component('mail::message')
-    # Verifikasi Reset Kata Sandi
+    {{-- Header Email dengan Nama Aplikasi --}}
+    @component('mail::header', ['url' => config('app.url')])
+        {{ config('app.name') }}
+    @endcomponent
+
+    Verifikasi Reset Kata Sandi
 
     Halo,
 
-    Kami menerima permintaan untuk mereset kata sandi akun **TRIMESTRA** Anda.
+    Kami menerima permintaan untuk mereset kata sandi akun Anda.
 
-    Untuk melanjutkan proses reset dan memverifikasi bahwa ini memang Anda, silakan gunakan **Kode PIN** verifikasi satu
-    kali di bawah ini:
+    Untuk melanjutkan proses reset, silakan gunakan Kode PIN verifikasi satu kali di bawah ini. Kode ini hanya berlaku
+    selama 10 menit.
 
+    {{-- Panel yang Didesain Ulang untuk PIN --}}
     @component('mail::panel')
-        <div
-            style="text-align: center; font-size: 32px; font-weight: 700; letter-spacing: 5px; color: #059669; padding: 15px 0; border: 2px dashed #D1FAE5; border-radius: 6px;">
+        <p
+            style="text-align: center; font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #059669; margin: 0; padding: 10px 0;">
             {{ $pin }}
-        </div>
+        </p>
     @endcomponent
 
-    **Penting:** Kode PIN ini hanya berlaku selama **10 menit** sejak email ini dikirim. Setelah waktu tersebut, Anda harus
-    meminta PIN baru.
+    Penting:
+    Jika Anda tidak merasa meminta reset kata sandi, mohon abaikan email ini. Tidak ada perubahan yang akan dilakukan pada
+    akun Anda.
 
+    Terima kasih,
+
+
+
+
+    Tim {{ config('app.name') }}
+
+    {{-- Subcopy untuk Footer --}}
     @component('mail::subcopy')
-        Jika Anda tidak pernah meminta reset kata sandi, mohon abaikan email ini. Akun Anda tetap aman dan kata sandi Anda tidak
-        akan berubah.
+        Jika Anda mengalami masalah, silakan hubungi tim dukungan kami.
     @endcomponent
 
-    Terima kasih atas kerja sama Anda,<br>
-    Tim Dukungan {{ config('app.name') }}
 @endcomponent

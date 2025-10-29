@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\PasswordReset;
+use App\Mail\SendPinMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -17,44 +18,54 @@ class ForgotPasswordController extends Controller
     public function sendPin(Request $request)
     {
         $request->validate(['email' => 'required|email|exists:users,email'], [
-            'email.exists' => 'Email tidak terdaftar dalam sistem kami.',
+            'email.exists' => 'Email tidak terdaftar.',
         ]);
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            // Berikan pesan umum untuk keamanan (agar tidak membocorkan keberadaan email)
-            return response()->json(['message' => 'Jika email terdaftar, PIN akan dikirimkan.'], 200);
+            return response()->json(['message' => 'Email tidak terdaftar.'], 404);
         }
 
-        // --- PERBAIKAN KRUSIAL: Pemeriksaan Cooldown ---
-        // Cek apakah PIN baru-baru ini dikirim (dalam 60 detik terakhir)
+        // --- Pemeriksaan Cooldown ---
         $lastPin = PasswordReset::where('email', $request->email)
-            ->latest() // Ambil yang terbaru
+            ->latest()
             ->first();
 
-        if ($lastPin && $lastPin->created_at->greaterThan(now()->subMinute())) {
-            // Jika ada PIN yang dibuat dalam 1 menit terakhir, tolak.
-            $cooldown = 60 - $lastPin->created_at->diffInSeconds(now());
-            return response()->json(['message' => "Tunggu {$cooldown} detik sebelum mengirim ulang PIN"], 429);
+        if ($lastPin) {
+            // Konversi created_at menjadi Carbon instance jika belum
+            $lastPinCreatedAt = Carbon::parse($lastPin->created_at);
+
+            if ($lastPinCreatedAt->greaterThan(now()->subMinute())) {
+                $cooldown = 60 - $lastPinCreatedAt->diffInSeconds(now());
+                return response()->json(['message' => "Tunggu {$cooldown} detik sebelum mengirim ulang PIN"], 429);
+            }
         }
 
-        // --- PERBAIKAN KRUSIAL: Invaliasi PIN Lama ---
-        // Hapus SEMUA PIN yang belum digunakan/kedaluwarsa untuk email ini
+
+        // --- Invaliasi PIN Lama ---
         PasswordReset::where('email', $request->email)->delete();
+
 
         // Buat PIN baru
         $pin = rand(100000, 999999);
 
-        PasswordReset::create([
+        PasswordReset::insert([
             'email' => $request->email,
             'pin' => $pin,
             'expires_at' => Carbon::now()->addMinutes(10), // PIN berlaku 10 menit
+            'created_at' => Carbon::now() // Tambahkan created_at
         ]);
 
-        // Kirim email PIN
-        Mail::raw("PIN reset password Anda adalah: {$pin}. PIN ini berlaku 10 menit.", function ($message) use ($request) {
-            $message->to($request->email)->subject('Reset Password PIN');
-        });
+        // Kirim email PIN menggunakan Mailable dan Blade template
+        try {
+            Mail::to($request->email)->send(new SendPinMail($pin));
+        } catch (\Exception $e) {
+            // Tangani jika email gagal terkirim
+            // \Log::error('Email send failed: ' . $e->getMessage()); // Opsional: logging
+            return response()->json(['message' => 'Gagal mengirim email. Silakan coba lagi.'], 500);
+        }
+        // ---------------------------------------------
 
         return response()->json(['message' => 'PIN baru telah dikirim ke email Anda.']);
     }
