@@ -10,6 +10,7 @@ use App\Http\Controllers\FoodCategoryController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\FoodDiaryController;
 use App\Http\Controllers\FoodDiaryItemController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NutritionRequirementController;
@@ -35,6 +36,9 @@ use Illuminate\Support\Facades\Route;
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendPin']);
+Route::post('/verify-pin', [ForgotPasswordController::class, 'verifyPin']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 Route::get('/provinces', [LocationController::class, 'provinces']);
 Route::get('/regencies', [LocationController::class, 'regencies']);
 Route::get('/districts', [LocationController::class, 'districts']);
