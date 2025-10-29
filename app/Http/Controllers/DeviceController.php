@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DeviceResource;
 use App\Models\Device;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class DeviceController extends Controller implements HasMiddleware
 {
@@ -124,6 +126,11 @@ class DeviceController extends Controller implements HasMiddleware
         Device::where('user_id', $data['user_id'])->update(['is_active' => false]);
 
         $device = Device::where('device_code', $data['device_code'])->firstOrFail();
+
+        if ($device->user_id && $device->user_id != $data['user_id']) {
+            return response()->json(['message' => 'Device sudah terdaftar pada user lain'], 400);
+        }
+
         $device->update([
             'user_id' => $data['user_id'],
             'is_active' => true,
@@ -132,6 +139,50 @@ class DeviceController extends Controller implements HasMiddleware
 
         return new DeviceResource($device);
     }
+
+    public function unlink(Request $request, Device $device)
+    {
+        if (!$device->user_id) {
+            return response()->json([
+                'message' => 'Device belum tertaut ke user manapun'
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        // Jika bukan pemilik device dan bukan admin → forbidden
+        if ($device->user_id != $user->id && !$user->is_admin) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki izin untuk melepaskan device ini'
+            ], 403);
+        }
+
+        // Validasi password jika ingin unlink
+        $data = $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (!Hash::check($data['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Password salah'
+            ], 400);
+        }
+
+
+        // Putuskan relasi
+        $device->update([
+            'user_id'       => null,
+            'is_active'     => false,
+            'registered_at' => null,
+            'last_sync_at'  => null,
+        ]);
+
+        return response()->json([
+            'message' => 'Device berhasil dilepas dari user',
+            'device'  => $device,
+        ], 200);
+    }
+
 
     public function status(Request $request)
     {

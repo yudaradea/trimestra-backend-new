@@ -16,10 +16,14 @@ class ExerciseLog extends Model
         'duration',
         'calories_burned',
         'date',
+        'from_device',
+        'activity_name',
     ];
 
     protected $casts = [
+        // buat date dengan jam juga
         'date' => 'date',
+        'from_device' => 'boolean',
     ];
 
     public function scopeSearch($query, $search)

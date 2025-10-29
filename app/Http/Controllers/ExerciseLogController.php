@@ -11,6 +11,7 @@ use App\Models\ExerciseLog;
 use App\Models\UserExercise;
 use Exception;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ExerciseLogController extends Controller
 {
@@ -66,6 +67,20 @@ class ExerciseLogController extends Controller
         }
     }
 
+    public function activityLogs(Request $request)
+    {
+        $query = ExerciseLog::where('user_id', $request->user()->id)
+            ->where('from_device', true);
+
+        if ($request->has('date')) {
+            $query->whereDate('date', $request->date);
+        }
+
+        return ExerciseLogResource::collection(
+            $query->orderBy('created_at', 'desc')->paginate($request->get('per_page', 10))
+        );
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -109,6 +124,34 @@ class ExerciseLogController extends Controller
         } catch (Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 400);
         }
+    }
+
+    public function storeFromDevice(Request $request)
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'activity_name'   => 'required|string|max:255',
+            'duration'        => 'required|integer|min:0',
+            'calories_burned' => 'required|integer|min:0',
+            'date'            => 'required|date',
+        ]);
+
+        $log = ExerciseLog::create([
+            'user_id'        => $user->id,
+            'activity_name'  => $data['activity_name'],
+            'duration'       => $data['duration'],
+            'calories_burned' => $data['calories_burned'],
+            'date' => $data['date'],
+            'from_device'    => true,
+        ]);
+
+        return ResponseHelper::jsonResponse(
+            true,
+            'Aktivitas dari device berhasil dicatat',
+            new ExerciseLogResource($log),
+            200
+        );
     }
 
 

@@ -93,6 +93,10 @@ Route::middleware(['auth:sanctum', 'update-trimester'])->group(function () {
     Route::apiResource('exercise-log', ExerciseLogController::class);
     Route::get('/exercise-log/all/paginated', [ExerciseLogController::class, 'getAllPaginated']);
 
+    // from device
+    Route::post('/exercise-logs/device', [ExerciseLogController::class, 'storeFromDevice']);
+    Route::get('/exercise-logs/activity', [ExerciseLogController::class, 'activityLogs']);
+
     // Diary
     Route::get('/diary', [DiaryController::class, 'index']);
     Route::get('/diary/report', [DiaryController::class, 'nutritionReport']);
@@ -113,6 +117,7 @@ Route::middleware(['auth:sanctum', 'update-trimester'])->group(function () {
     Route::prefix('device')->group(function () {
         // custom endpoints (letakkan duluan)
         Route::post('/link', [DeviceController::class, 'link']);
+        Route::post('/{device}/unlink', [DeviceController::class, 'unlink']);
         Route::get('/status', [DeviceController::class, 'status']);
         Route::get('/linked-devices', [DeviceController::class, 'linkedDevices']);
         Route::post('/{device}/sync', [DeviceController::class, 'sync']);
