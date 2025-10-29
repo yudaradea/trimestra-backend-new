@@ -24,7 +24,7 @@ class UserRepository implements UserRepositoryInterfaces
         })->with(['profile', 'nutritionTargets', 'devices']);
 
         if ($limit) {
-            $query->take($limit);
+            $query->orderBy('created_at', 'desc')->take($limit);
         }
 
         if ($execute) {
