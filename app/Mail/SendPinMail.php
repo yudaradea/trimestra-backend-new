@@ -20,6 +20,6 @@ class SendPinMail extends Mailable
     public function build()
     {
         return $this->subject('Kode Reset Password TRIMESTRA')
-            ->markdown('emails.send_pin');
+            ->view('emails.send_pin');
     }
 }
