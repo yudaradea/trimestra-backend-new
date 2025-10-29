@@ -16,7 +16,9 @@ class ForgotPasswordController extends Controller
      */
     public function sendPin(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate(['email' => 'required|email|exists:users,email'], [
+            'email.exists' => 'Email tidak terdaftar dalam sistem kami.',
+        ]);
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
