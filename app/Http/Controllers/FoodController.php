@@ -75,7 +75,7 @@ class FoodController extends Controller implements HasMiddleware
         $profile = $request->user()->profile;
 
         // Jika user belum punya profile atau tidak punya alergi → random food
-        if (!$profile || empty($profile->food_allergies) || $profile->food_allergies == 'tidak punya') {
+        if (!$profile || empty($profile->food_allergies) || $profile->food_allergies == 'tidak punya' || $profile->food_allergies == 'Tidak Punya') {
             $foods = Food::inRandomOrder()->limit(8)->get();
             return ResponseHelper::jsonResponse(true, 'Data makanan berhasil diambil', FoodResource::collection($foods), 200);
         }
