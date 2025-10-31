@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Interfaces\FoodRepositoryInterface;
+use App\Models\Allergy;
 use App\Models\Food;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -80,6 +81,7 @@ class FoodRepository implements FoodRepositoryInterface
 
         try {
             $food = Food::find($id);
+
             $food->update($data);
 
             // jika ada perubahan image maka hapus image lama

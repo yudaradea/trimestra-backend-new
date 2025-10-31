@@ -74,17 +74,38 @@ class FoodController extends Controller implements HasMiddleware
     {
         $profile = $request->user()->profile;
 
-        // Jika user belum punya profile atau tidak punya alergi → random food
-        if (!$profile || empty($profile->food_allergies) || $profile->food_allergies == 'tidak punya' || $profile->food_allergies == 'Tidak Punya') {
+        // 1. Cek Profil Ada
+        if (!$profile) {
             $foods = Food::inRandomOrder()->limit(8)->get();
             return ResponseHelper::jsonResponse(true, 'Data makanan berhasil diambil', FoodResource::collection($foods), 200);
         }
 
-        // Jika punya alergi → exclude makanan dengan alergi tsb
-        $allergies = json_encode($profile->food_allergies);
+        $allergies = $profile->food_allergies ?? []; // Pastikan ini selalu array, meskipun null
 
-        $foods = Food::where(function ($query) use ($allergies) {
-            $query->whereRaw("NOT JSON_OVERLAPS(allergies, ?)", [$allergies])
+        // Asumsi: Nilai yang TIDAK perlu difilter adalah "Tidak Ada" atau ID 1
+        $no_allergy_values = ["Tidak Ada", 1];
+
+        // Membersihkan array alergi dari nilai-nilai yang tidak relevan (seperti "Tidak Ada")
+        // Alergi yang tersisa di $validAllergies adalah yang harus dikecualikan
+        $validAllergies = collect($allergies)
+            ->reject(fn($value) => in_array($value, $no_allergy_values))
+            ->values()
+            ->toArray();
+
+        // 2. Jika array alergi yang valid (yang harus dikecualikan) KOSONG
+        if (empty($validAllergies)) {
+            // User tidak punya alergi atau hanya memilih "Tidak Ada"
+            $foods = Food::inRandomOrder()->limit(8)->get();
+            return ResponseHelper::jsonResponse(true, 'Data makanan berhasil diambil', FoodResource::collection($foods), 200);
+        }
+
+        // 3. Jika Ada Alergi Valid (filter dan ambil 8 makanan)
+
+        // Ubah array PHP alergi valid menjadi JSON string untuk query database
+        $allergiesJson = json_encode($validAllergies);
+
+        $foods = Food::where(function ($query) use ($allergiesJson) {
+            $query->whereRaw("NOT JSON_OVERLAPS(allergies, ?)", [$allergiesJson])
                 ->orWhereNull('allergies');
         })
             ->inRandomOrder()

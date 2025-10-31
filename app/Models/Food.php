@@ -38,9 +38,4 @@ class Food extends Model
     {
         return $query->where('name', 'like', "%{$search}%");
     }
-
-    // public function getAllergiesAttribute()
-    // {
-    //     return Allergy::whereIn('name', $this->allergies ?? [])->get();
-    // }
 }
